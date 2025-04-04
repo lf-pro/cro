@@ -7,7 +7,7 @@ from scripts import run_bayes_beta
 st.set_page_config(page_title="Análise de Teste A/B", layout="wide")
 
 st.title("Plataforma de Análise de Teste A/B")
-st.caption("Criado por LF com apoio do ChatGPT")
+st.caption("Developed by LF Corporations")
 
 uploaded_file = st.file_uploader("Envie o arquivo Excel com colunas: data, variante, receita, sessoes")
 
