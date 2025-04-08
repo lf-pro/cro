@@ -26,23 +26,31 @@ def run_bootstrap(df):
     ci_diff = np.percentile(diff_boot, [5, 95])
     p_value = (diff_boot < 0).mean()
 
-    fig, ax = plt.subplots(figsize=(12, 6))
-    sns.histplot(boot_controle, bins=50, color='blue', alpha=0.5, label='Controle')
-    sns.histplot(boot_nova, bins=50, color='green', alpha=0.5, label='Nova')
-    ax.axvline(ci_controle[0], color='blue', linestyle='dashed')
-    ax.axvline(ci_controle[1], color='blue', linestyle='dashed')
-    ax.axvline(ci_nova[0], color='green', linestyle='dashed')
-    ax.axvline(ci_nova[1], color='green', linestyle='dashed')
-    ax.legend()
-    ax.set_title("Distribuição do RPV Diário com Intervalos de Confiança")
+    fig, ax = plt.subplots(figsize=(12, 6), dpi=150)
+    sns.histplot(boot_controle, bins=50, color='#3498db', alpha=0.6, label='Controle', kde=True)
+    sns.histplot(boot_nova, bins=50, color='#2ecc71', alpha=0.6, label='Nova', kde=True)
+    ax.axvline(ci_controle[0], color='#3498db', linestyle='dashed', linewidth=1.5)
+    ax.axvline(ci_controle[1], color='#3498db', linestyle='dashed', linewidth=1.5)
+    ax.axvline(ci_nova[0], color='#2ecc71', linestyle='dashed', linewidth=1.5)
+    ax.axvline(ci_nova[1], color='#2ecc71', linestyle='dashed', linewidth=1.5)
+    ax.set_title("Distribuição do RPV Diário com Intervalos de Confiança", fontweight='bold')
+    ax.set_xlabel("Receita por Visita (RPV)")
+    ax.set_ylabel("Frequência")
+    ax.legend(frameon=True, fancybox=True, shadow=True)
+    ax.grid(True, alpha=0.3)
+    plt.tight_layout()
     st.pyplot(fig)
 
-    fig2, ax2 = plt.subplots(figsize=(10, 5))
-    sns.histplot(diff_boot, bins=50, color='purple', alpha=0.7)
-    ax2.axvline(ci_diff[0], color='red', linestyle='dashed')
-    ax2.axvline(ci_diff[1], color='red', linestyle='dashed')
-    ax2.axvline(0, color='black', linestyle='solid')
-    ax2.set_title("Diferença entre Nova e Controle (RPV Diário)")
+    fig2, ax2 = plt.subplots(figsize=(10, 5), dpi=150)
+    sns.histplot(diff_boot, bins=50, color='#9b59b6', alpha=0.7, kde=True)
+    ax2.axvline(ci_diff[0], color='#e74c3c', linestyle='dashed', linewidth=1.5)
+    ax2.axvline(ci_diff[1], color='#e74c3c', linestyle='dashed', linewidth=1.5)
+    ax2.axvline(0, color='black', linestyle='solid', linewidth=1.5)
+    ax2.set_title("Diferença entre Nova e Controle (RPV Diário)", fontweight='bold')
+    ax2.set_xlabel("Diferença de RPV")
+    ax2.set_ylabel("Frequência")
+    ax2.grid(True, alpha=0.3)
+    plt.tight_layout()
     st.pyplot(fig2)
 
     st.markdown("---")
@@ -60,8 +68,8 @@ def run_bootstrap(df):
 
 
 # scripts/run_bayes_beta.py
-import numpy as np
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.stats import beta
@@ -91,25 +99,85 @@ def run_bayes_beta(df):
 
     prob_nova_melhor = (samples_nova > samples_controle).mean()
 
-    fig, ax = plt.subplots(figsize=(12, 6))
-    sns.kdeplot(samples_controle, label='Controle', color='blue', fill=True)
-    sns.kdeplot(samples_nova, label='Nova', color='green', fill=True)
-    ax.axvline(np.percentile(samples_controle, 5), color='blue', linestyle='dashed')
-    ax.axvline(np.percentile(samples_controle, 95), color='blue', linestyle='dashed')
-    ax.axvline(np.percentile(samples_nova, 5), color='green', linestyle='dashed')
-    ax.axvline(np.percentile(samples_nova, 95), color='green', linestyle='dashed')
-    ax.set_title("Distribuição Bayesiana do RPV")
-    ax.legend()
-    st.pyplot(fig)
-
-    st.markdown("---")
-    st.write(f"**RPV Controle:** Média = {np.mean(samples_controle):.4f}, IC 90% = [{np.percentile(samples_controle, 5):.4f}, {np.percentile(samples_controle, 95):.4f}]")
-    st.write(f"**RPV Nova:** Média = {np.mean(samples_nova):.4f}, IC 90% = [{np.percentile(samples_nova, 5):.4f}, {np.percentile(samples_nova, 95):.4f}]")
-    st.write(f"**Probabilidade da Nova Variante ser Melhor:** {prob_nova_melhor:.2%}")
-
-    if prob_nova_melhor > 0.95:
-        st.success("✅ A nova variante tem alta probabilidade de ser melhor que o Controle!")
-    elif prob_nova_melhor < 0.05:
-        st.error("❌ A nova variante tem alta probabilidade de ser pior que o Controle!")
-    else:
-        st.warning("⚠️ O resultado não é conclusivo. Pode ser necessário mais dados.")
+    # Reposicionamento dos dados ao lado dos gráficos
+    col1, col2 = st.columns([2, 1])
+    
+    with col1:
+        # Gráfico de distribuição
+        fig, ax = plt.subplots(figsize=(12, 6), dpi=150)
+        sns.kdeplot(samples_controle, label='Controle', color='#3498db', fill=True, alpha=0.6, linewidth=2)
+        sns.kdeplot(samples_nova, label='Nova', color='#2ecc71', fill=True, alpha=0.6, linewidth=2)
+        ax.axvline(np.percentile(samples_controle, 5), color='#3498db', linestyle='dashed', linewidth=1.5)
+        ax.axvline(np.percentile(samples_controle, 95), color='#3498db', linestyle='dashed', linewidth=1.5)
+        ax.axvline(np.percentile(samples_nova, 5), color='#2ecc71', linestyle='dashed', linewidth=1.5)
+        ax.axvline(np.percentile(samples_nova, 95), color='#2ecc71', linestyle='dashed', linewidth=1.5)
+        ax.set_title("Distribuição Bayesiana do RPV", fontweight='bold')
+        ax.set_xlabel("Receita por Visita (RPV)")
+        ax.set_ylabel("Densidade")
+        ax.legend(frameon=True, fancybox=True, shadow=True)
+        ax.grid(True, alpha=0.3)
+        plt.tight_layout()
+        st.pyplot(fig)
+    
+    with col2:
+        # Dados estatísticos
+        st.markdown("### Resultados Bayesianos")
+        st.write(f"**RPV Controle:**")
+        st.write(f"Média = {np.mean(samples_controle):.4f}")
+        st.write(f"IC 90% = [{np.percentile(samples_controle, 5):.4f}, {np.percentile(samples_controle, 95):.4f}]")
+        
+        st.write(f"**RPV Nova:**")
+        st.write(f"Média = {np.mean(samples_nova):.4f}")
+        st.write(f"IC 90% = [{np.percentile(samples_nova, 5):.4f}, {np.percentile(samples_nova, 95):.4f}]")
+        
+        # Probabilidade e interpretação
+        st.markdown("### Probabilidade")
+        st.metric("Nova > Controle", f"{prob_nova_melhor:.2%}")
+        
+        # Interpretação do resultado
+        st.markdown("### Interpretação")
+        if prob_nova_melhor > 0.95:
+            st.success("✅ Nova variante é superior (95% de certeza)")
+        elif prob_nova_melhor > 0.90:
+            st.success("✅ Nova variante é provavelmente superior (90% de certeza)")
+        elif prob_nova_melhor < 0.05:
+            st.error("❌ Nova variante é inferior (95% de certeza)")
+        elif prob_nova_melhor < 0.10:
+            st.error("❌ Nova variante é provavelmente inferior (90% de certeza)")
+        else:
+            st.warning("⚠️ Resultado inconclusivo")
+    
+    # Se houver um segundo gráfico (diferença), aplicar o mesmo layout
+    if 'diff_samples' in locals():
+        col3, col4 = st.columns([2, 1])
+        
+        with col3:
+            fig2, ax2 = plt.subplots(figsize=(10, 5), dpi=150)
+            sns.histplot(diff_samples, bins=50, color='#9b59b6', alpha=0.7, kde=True)
+            ax2.axvline(np.percentile(diff_samples, 5), color='#e74c3c', linestyle='dashed', linewidth=1.5)
+            ax2.axvline(np.percentile(diff_samples, 95), color='#e74c3c', linestyle='dashed', linewidth=1.5)
+            ax2.axvline(0, color='black', linestyle='solid', linewidth=1.5)
+            ax2.set_title("Diferença entre Nova e Controle (RPV)", fontweight='bold')
+            ax2.set_xlabel("Diferença de RPV")
+            ax2.set_ylabel("Frequência")
+            ax2.grid(True, alpha=0.3)
+            plt.tight_layout()
+            st.pyplot(fig2)
+        
+        with col4:
+            # Interpretação da diferença
+            st.markdown("### Diferença")
+            st.write(f"**Diferença (Nova - Controle):**")
+            st.write(f"Média = {np.mean(diff_samples):.4f}")
+            st.write(f"IC 90% = [{np.percentile(diff_samples, 5):.4f}, {np.percentile(diff_samples, 95):.4f}]")
+            
+            # Recomendação
+            st.markdown("### Recomendação")
+            if prob_nova_melhor > 0.95:
+                st.success("Implementar a Nova variante")
+            elif prob_nova_melhor > 0.90:
+                st.success("Considerar implementar a Nova variante")
+            elif prob_nova_melhor < 0.10:
+                st.error("Manter a variante Controle")
+            else:
+                st.warning("Considerar mais testes")
